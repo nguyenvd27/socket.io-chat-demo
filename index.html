@@ -1,0 +1,138 @@
+<html>
+<head>
+	<title>IO Chat</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<style type="text/css">
+		body{
+			margin-top: 50px;
+			/*background-color: #669900;*/
+		}
+
+		#messageArea{
+			/*display: none;*/
+			margin-top: 50px;
+		}
+		#userFormArea{
+			background-color: #999900;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<p class="text-center">DEMO SOCKET.IO</p>
+		<hr />
+		<div id="userFormArea" class="row">
+			<div class="col-md-12">
+				<form id="userForm">
+					<div class="form-group">
+						<label>Enter Username</label>
+						<div class="spinner-grow text-success" role="status">
+						  <span class="sr-only">Loading...</span>
+						</div>
+						<input class="form-control" id="username" />
+						<br />
+						<input type="submit" class="btn btn-success" name="User" value="Login" />
+					</div>
+				</form>
+			</div>
+		</div>
+		<hr />
+		<hr />
+		<div id="messageArea" class="row">
+			<div class="col-md-4">
+				<div class="well">
+					<h3 class="text-danger">Online Users</h3>
+					<ul class="list-group" id="users"></ul>
+				</div>
+			</div>
+			<div class="col-md-4 ">
+				Nơi Hiện Chat
+				<div class="bg-light" id="chat">
+					
+				</div>
+			</div>
+			<div class="col-md-4">
+				
+				<form id="messageForm">
+					<div class="form-group">
+						<div id="nickname"></div>
+						<br />
+						<!-- <label>Enter Message</label> -->
+						<textarea class="form-control" id="message" placeholder="Enter Message"></textarea>
+						<br />
+						<input type="submit" class="btn btn-outline-success" name="Message" value="Send Message" />
+					</div>
+				</form>
+			</div>
+		</div>
+		<hr />
+		<p class="text-center text-success" id="nguyenvd27">--------Design by nguyenvd27---------</p>
+	</div>
+
+	<script type="text/javascript">
+		$(function(){
+			var socket = io.connect();
+			var $messageForm = $('#messageForm');
+			var $message = $('#message');
+			var $chat = $('#chat');
+
+			var $messageArea = $('#messageArea');
+			var $userFormArea = $('#userFormArea');
+			var $userForm = $('#userForm');
+			var $users = $('#users');
+			var $username = $('#username');
+			var $nickname = $('#nickname');
+
+			$messageForm.submit(function(e){
+				e.preventDefault();
+				//console.log('Submited');
+				socket.emit('send message', $message.val());
+				$message.val('');
+			});
+
+			socket.on('mew message', function(data){
+				if(data.user=="nguyenvd27")
+					$chat.append('<div class="text-danger"><strong>'+data.user+'</strong>:  '+data.msg+'</div>');
+				else
+					$chat.append('<div class=""><strong>'+data.user+'</strong>:  '+data.msg+'</div><br />');
+			});
+
+			$userForm.submit(function(e){
+				e.preventDefault();
+				//console.log('Submited');
+				socket.emit('new user', $username.val(), function(data){
+					//console.log("oo "+data);
+					if(data){
+						$userFormArea.hide();
+						$messageArea.show();
+						$nickname.append('<div class="">NichName: <strong>'+$username.val()+'</strong><br />');
+					}
+					$username.val('');
+				});
+				//$username.val('');
+			}); 
+
+			socket.on('get users', function(data){
+				var html = '';
+				for(var i=0;i < data.length;i++){
+					if(data[i] == "nguyenvd27"){
+						html += '<li class="list-group-item">'+data[i]+
+						'<div class="spinner-grow text-danger" role="status">'+
+						  '<span class="sr-only">Loading...</span>'+
+						'</div>'+'</li>';
+					}else{
+						html += '<li class="list-group-item">'+data[i]+'</li>';
+					}
+					
+				}
+				$users.html(html);
+			})
+		});
+	</script>
+</body>
+</html>
