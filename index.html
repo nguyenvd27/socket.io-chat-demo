@@ -51,6 +51,7 @@
 				</div>
 			</div>
 			<div class="col-md-4 ">
+				<div id="soanTinNhan"></div>
 				Nơi Hiện Chat
 				<div class="bg-light" id="chat">
 					
@@ -77,6 +78,7 @@
 	<script type="text/javascript">
 		$(function(){
 			var socket = io.connect();
+
 			var $messageForm = $('#messageForm');
 			var $message = $('#message');
 			var $chat = $('#chat');
@@ -106,16 +108,26 @@
 				e.preventDefault();
 				//console.log('Submited');
 				socket.emit('new user', $username.val(), function(data){
-					//console.log("oo "+data);
-					if(data){
-						$userFormArea.hide();
-						$messageArea.show();
-						$nickname.append('<div class="">NichName: <strong>'+$username.val()+'</strong><br />');
-					}
-					$username.val('');
+					// if(data){
+					// 	$userFormArea.hide();
+					// 	$messageArea.show();
+					// 	$nickname.append('<div class="">Name: <strong>'+$username.val()+'</strong><br />');
+					// }
+					// $username.val('');
 				});
 				//$username.val('');
 			}); 
+
+			socket.on('login that bai', function(){
+				alert('Username sai hoặc bị trùng');
+			});
+
+			socket.on('login thanh cong', function(){
+					$userFormArea.hide();
+					$messageArea.show();
+					$nickname.append('<div class="">Name: <strong>'+$username.val()+'</strong><br />');
+					$username.val('');
+			});
 
 			socket.on('get users', function(data){
 				var html = '';
@@ -131,7 +143,22 @@
 					
 				}
 				$users.html(html);
-			})
+			});
+
+			//su kien go chu - soan tin nhan
+			// $message.focusin(function(){
+			// 	socket.emit('Soan tin nhan');
+			// });
+			// socket.on('co nguoi dang soan tin',function(data){
+			// 	$('#soanTinNhan').html('<p>'+data+'</p>');
+			// });
+
+			// $message.focusout(function(){
+			// 	socket.emit('khong soan tin');
+			// });
+			// socket.on('stop go chu',function(){
+			// 	$('#soanTinNhan').html('');
+			// });
 		});
 	</script>
 </body>
